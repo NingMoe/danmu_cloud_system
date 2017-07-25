@@ -1,7 +1,7 @@
 package cn.partytime.service;
 
 import cn.partytime.config.DanmuChannelRepository;
-import cn.partytime.rpcService.dataRpc.AdminUserService;
+import cn.partytime.dataRpc.RpcAdminService;
 import cn.partytime.model.AdminTaskModel;
 import cn.partytime.model.AdminUser;
 import io.netty.channel.Channel;
@@ -16,18 +16,18 @@ import org.springframework.stereotype.Service;
 public class AdminLoginService {
 
     @Autowired
-    private AdminUserService adminUserService;
+    private RpcAdminService rpcAdminService;
 
     @Autowired
     private DanmuChannelRepository danmuChannelRepository;
 
 
     public boolean isLogin(String auth_key){
-        return  adminUserService.checkAuthKey(auth_key);
+        return  rpcAdminService.checkAuthKey(auth_key);
     }
 
     public void adminLogin(String auth_key, Channel channel, int partyType){
-        AdminUser adminUser = adminUserService.getAdminUser(auth_key);
+        AdminUser adminUser = rpcAdminService.getAdminUser(auth_key);
         AdminTaskModel adminTaskModel = new AdminTaskModel();
         adminTaskModel.setPartyType(partyType);
         adminTaskModel.setAuthKey(auth_key);

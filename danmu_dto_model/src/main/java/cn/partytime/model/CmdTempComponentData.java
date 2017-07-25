@@ -1,12 +1,10 @@
 package cn.partytime.model;
 
-
-import lombok.Data;
-
 import java.util.List;
 
-
-@Data
+/**
+ * Created by administrator on 2017/5/10.
+ */
 public class CmdTempComponentData {
 
     private String id;
@@ -38,4 +36,84 @@ public class CmdTempComponentData {
     //0数字 1布尔值 2字符串 3数组
     private Integer type;
 
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getComponentId() {
+        return componentId;
+    }
+
+    public void setComponentId(String componentId) {
+        this.componentId = componentId;
+    }
+
+    public List<CmdComponentValue> getCmdComponentValueList() {
+        return cmdComponentValueList;
+    }
+
+    public void setCmdComponentValueList(List<CmdComponentValue> cmdComponentValueList) {
+        this.cmdComponentValueList = cmdComponentValueList;
+    }
+
+    public String getKey() {
+        return key;
+    }
+
+    public void setKey(String key) {
+        this.key = key;
+    }
+
+    public String getDefaultValue() {
+        return defaultValue;
+    }
+
+    public void setDefaultValue(String defaultValue) {
+        this.defaultValue = defaultValue;
+    }
+
+    public Integer getIsCheck() {
+        return isCheck;
+    }
+
+    public void setIsCheck(Integer isCheck) {
+        this.isCheck = isCheck;
+    }
+
+    public Integer getSort() {
+        return sort;
+    }
+
+    public void setSort(Integer sort) {
+        this.sort = sort;
+    }
+
+    public String getCheckRule() {
+        return checkRule;
+    }
+
+    public void setCheckRule(String checkRule) {
+        this.checkRule = checkRule;
+    }
+
+    public Integer getType() {
+        return type;
+    }
+
+    public void setType(Integer type) {
+        this.type = type;
+    }
+
+
+    public Integer getComponentType() {
+        return componentType;
+    }
+
+    public void setComponentType(Integer componentType) {
+        this.componentType = componentType;
+    }
 }

@@ -40,7 +40,8 @@
         <module>danmu_message_handler</module>
         <module>danmu_dto_model</module>
 
-
+        <module>danmu_rpc_interface</module>
+        <module>danmu_rpc_alarm_interface</module>
 
     </modules>
 

@@ -2,6 +2,10 @@ package cn.partytime.model;
 
 import java.util.List;
 
+/**
+ * Created by liuwei on 2016/9/12.
+ * 用于表明活动与资源文件的关联
+ */
 public class PartyResourceResult {
 
     private Party party;

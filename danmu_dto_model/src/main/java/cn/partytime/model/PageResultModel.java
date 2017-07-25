@@ -1,5 +1,6 @@
 package cn.partytime.model;
 
+
 import java.util.List;
 
 /**
@@ -11,7 +12,6 @@ public class PageResultModel<T> {
 
     public PageResultModel() {
     }
-
     public PageResultModel(long total, List<T> rows) {
         this.total = total;
         this.rows = rows;

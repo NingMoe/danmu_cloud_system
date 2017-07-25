@@ -1,23 +1,24 @@
 package cn.partytime.service;
 
+import cn.partytime.alarmRpc.RpcMovieAlarmService;
+import cn.partytime.alarmRpc.RpcProjectorAlarmService;
 import cn.partytime.common.cachekey.*;
 import cn.partytime.common.constants.PotocolComTypeConst;
 import cn.partytime.common.constants.ProtocolConst;
 import cn.partytime.common.util.DateUtils;
 import cn.partytime.common.util.ListUtils;
+import cn.partytime.dataRpc.RpcDanmuClientService;
+import cn.partytime.dataRpc.RpcMovieScheduleService;
+import cn.partytime.dataRpc.RpcPartyService;
+import cn.partytime.dataRpc.RpcProjectorService;
 import cn.partytime.model.*;
 import cn.partytime.redis.service.RedisService;
-import cn.partytime.rpcService.alarmRpc.MovieAlarmService;
-import cn.partytime.rpcService.alarmRpc.ProjectorAlarmService;
-import cn.partytime.rpcService.dataRpc.*;
 import com.alibaba.fastjson.JSON;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -35,22 +36,22 @@ public class MovieLogicService {
     private static final Logger logger = LoggerFactory.getLogger(MovieLogicService.class);
 
     @Autowired
-    private ProjectorService projectorService;
+    private RpcProjectorService rpcProjectorService;
 
     @Autowired
-    private DanmuClientService danmuClientService;
+    private RpcDanmuClientService rpcDanmuClientService;
 
     @Autowired
-    private ProjectorAlarmService projectorAlarmService;
+    private RpcProjectorAlarmService rpcProjectorAlarmService;
 
     @Autowired
-    private MovieScheduleService moveScheduleService;
+    private RpcMovieScheduleService rpcMovieScheduleService;
 
     @Autowired
     private RedisService redisService;
 
     @Autowired
-    private PartyService partyService;
+    private RpcPartyService partyService;
 
     @Autowired
     private PreDanmuLogicService preDanmuLogicService;
@@ -59,13 +60,13 @@ public class MovieLogicService {
     private RedisTemplate redisTemplate;
 
     @Autowired
-    private MovieAlarmService movieAlarmService;
+    private RpcMovieAlarmService rpcMovieAlarmService;
 
     public RestResultModel partyStart(String registCode,String command,long clientTime) {
         Party party = partyService.findByMovieAliasOnLine(command);
         logger.info("弹幕开始请求：指令编号：{},registCode:{}", command, registCode);
         RestResultModel restResultModel = new RestResultModel();
-        DanmuClient danmuClient = danmuClientService.findByRegistCode(registCode);
+        DanmuClient danmuClient = rpcDanmuClientService.findByRegistCode(registCode);
 
         restResultModel = checkClientExist(danmuClient,registCode);
         if(restResultModel!=null){
@@ -78,7 +79,7 @@ public class MovieLogicService {
 
         String addressId = danmuClient.getAddressId();
         String partyId = party.getId();
-        List<MovieSchedule> movieScheduleList = moveScheduleService.findByPartyIdAndAddressId(partyId, addressId);
+        List<MovieSchedule> movieScheduleList = rpcMovieScheduleService.findByPartyIdAndAddressId(partyId, addressId);
         MovieSchedule movieSchedule = null;
         if (ListUtils.checkListIsNotNull(movieScheduleList)) {
             movieSchedule = movieScheduleList.get(0);
@@ -126,7 +127,7 @@ public class MovieLogicService {
     public RestResultModel moviceStart(String partyId,String registCode,long clientTime) {
         logger.info("电影开始请求：活动编号：{},registCode:{}", partyId, registCode);
         RestResultModel restResultModel = new RestResultModel();
-        DanmuClient danmuClient = danmuClientService.findByRegistCode(registCode);
+        DanmuClient danmuClient = rpcDanmuClientService.findByRegistCode(registCode);
         restResultModel = checkClientExist(danmuClient,registCode);
         if(restResultModel!=null){
             return restResultModel;
@@ -137,7 +138,7 @@ public class MovieLogicService {
             return restResultModel;
         }
         String addressId = danmuClient.getAddressId();
-        List<MovieSchedule> movieScheduleList = moveScheduleService.findByPartyIdAndAddressId(partyId, addressId);
+        List<MovieSchedule> movieScheduleList = rpcMovieScheduleService.findByPartyIdAndAddressId(partyId, addressId);
         MovieSchedule movieSchedule = null;
         if (ListUtils.checkListIsNotNull(movieScheduleList)) {
             movieSchedule = movieScheduleList.get(0);
@@ -176,7 +177,7 @@ public class MovieLogicService {
                         movieSchedule.setMoviceStartTime(DateUtils.getCurrentDate());
                         movieSchedule.setClientMoviceStartTime(clientTime);
                         movieSchedule.setUpdateTime(DateUtils.getCurrentDate());
-                        moveScheduleService.updateMovieSchedule(movieSchedule);
+                        rpcMovieScheduleService.updateMovieSchedule(movieSchedule);
                         sendPartyStatusToClient(partyId,"2",addressId,clientTime);
                         restResultModel = new RestResultModel();
                         restResultModel.setResult(200);
@@ -209,7 +210,7 @@ public class MovieLogicService {
         logger.info("电影结束请求：活动编号：{},registCode:{}", partyId, registCode);
         RestResultModel restResultModel = new RestResultModel();
 
-        DanmuClient danmuClient = danmuClientService.findByRegistCode(registCode);
+        DanmuClient danmuClient = rpcDanmuClientService.findByRegistCode(registCode);
 
         restResultModel = checkClientExist(danmuClient,registCode);
         if(restResultModel!=null){
@@ -223,7 +224,7 @@ public class MovieLogicService {
 
         restResultModel = new RestResultModel();
         String addressId = danmuClient.getAddressId();
-        List<MovieSchedule> movieScheduleList = moveScheduleService.findByPartyIdAndAddressId(partyId, addressId);
+        List<MovieSchedule> movieScheduleList = rpcMovieScheduleService.findByPartyIdAndAddressId(partyId, addressId);
         if (ListUtils.checkListIsNotNull(movieScheduleList)) {
             MovieSchedule movieSchedule = movieScheduleList.get(0);
             Date startDate = movieSchedule.getStartTime();
@@ -296,25 +297,25 @@ public class MovieLogicService {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                DanmuClient danmuClient =  danmuClientService.findByRegistCode(registCode);
+                DanmuClient danmuClient =  rpcDanmuClientService.findByRegistCode(registCode);
                 String addressId = danmuClient.getAddressId();
-                List<DanmuClient> danmuClientList = danmuClientService.findByAddressId(addressId);
+                List<DanmuClient> danmuClientList = rpcDanmuClientService.findByAddressId(addressId);
                 if(ListUtils.checkListIsNotNull(danmuClientList)){
                     for(DanmuClient tempDanmuClient:danmuClientList){
                         String code = tempDanmuClient.getRegistCode();
-                        PageResultModel<ProjectorAction> projectorActions =  projectorService.findProjectorActionPage(code,0,1);
+                        PageResultModel<ProjectorAction> projectorActions =  rpcProjectorService.findProjectorActionPage(code,0,1);
                         List<ProjectorAction> projectorActionList =projectorActions.getRows();
                         if(ListUtils.checkListIsNotNull(projectorActionList)){
                             for(ProjectorAction projectorAction :projectorActionList){
                                 if(projectorAction.getEndTime()!=null){
-                                    projectorAlarmService.projectorOpen(code);
+                                    rpcProjectorAlarmService.projectorOpen(code);
                                 }
                                 if(projectorAction.getCreateTime().before(DateUtils.getCurrentDate())){
-                                    projectorAlarmService.projectorOpen(code);
+                                    rpcProjectorAlarmService.projectorOpen(code);
                                 }
                             }
                         }else{
-                            projectorAlarmService.projectorOpen(code);
+                            rpcProjectorAlarmService.projectorOpen(code);
                         }
                     }
                 }
@@ -371,7 +372,7 @@ public class MovieLogicService {
         movieSchedule.setCreateTime(date);
         movieSchedule.setUpdateTime(date);
         movieSchedule.setClientMoviceStartTime(clientTime);
-        moveScheduleService.insertMovieSchedule(movieSchedule);
+        rpcMovieScheduleService.insertMovieSchedule(movieSchedule);
 
         //开启预制弹幕
         logger.info("电影开始，开启预制弹幕");
@@ -388,7 +389,7 @@ public class MovieLogicService {
         movieSchedule.setCreateTime(date);
         movieSchedule.setUpdateTime(date);
         movieSchedule.setClientStartTime(clientTime);
-        moveScheduleService.insertMovieSchedule(movieSchedule);
+        rpcMovieScheduleService.insertMovieSchedule(movieSchedule);
 
         //开启预制弹幕
         logger.info("弹幕开始，开启预制弹幕");
@@ -451,13 +452,13 @@ public class MovieLogicService {
     }
 
     private void stopMovie(MovieSchedule movieSchedule,Party party){
-        movieSchedule = moveScheduleService.updateMovieSchedule(movieSchedule);
+        movieSchedule = rpcMovieScheduleService.updateMovieSchedule(movieSchedule);
         long time = movieSchedule.getEndTime().getTime()-movieSchedule.getMoviceStartTime().getTime();
         if(party!=null && party.getMovieTime()==0){
             party.setMovieTime(time);
             party = partyService.saveParty(party);
         }
-        movieAlarmService.movieTime(party.getId(),movieSchedule.getAddressId(),time);
+        rpcMovieAlarmService.movieTime(party.getId(),movieSchedule.getAddressId(),time);
 
     }
 

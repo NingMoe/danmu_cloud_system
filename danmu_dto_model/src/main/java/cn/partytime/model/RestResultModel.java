@@ -1,8 +1,5 @@
 package cn.partytime.model;
 
-/**
- * Created by jack on 15/6/26.
- */
 public class RestResultModel {
 
   private int result;

@@ -9,9 +9,8 @@ import java.util.Date;
  * Created by Administrator on 2016/12/28.
  */
 
-
 @Data
-public class PartyLogicModel implements Serializable{
+public class PartyLogicModel implements Serializable {
 
     private String partyId;
 
@@ -59,6 +58,7 @@ public class PartyLogicModel implements Serializable{
      */
     private Integer dmDensity;
 
-    private long movieTime;
+
+    private Long movieTime;
 
 }
